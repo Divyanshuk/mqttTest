@@ -1,5 +1,6 @@
 package com.divyanshu.mqtttest;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,7 +11,10 @@ import android.widget.Toast;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
+import org.eclipse.paho.client.mqttv3.MqttCallback;
+import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -31,15 +35,9 @@ public class MainActivity extends AppCompatActivity {
 
         final EditText edit_message = (EditText) findViewById(R.id.edit_message);
         Button send_message = (Button) findViewById(R.id.send_message);
+//        Button receive_message = (Button) findViewById(R.id.receive_message);
 
-        /**
-         * Send message Button
-         */
-        send_message.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-        MqttConnectOptions options = new MqttConnectOptions();
+        final MqttConnectOptions options = new MqttConnectOptions();
         options.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1);
         options.setUserName("aakashk_kvjp58");
         options.setPassword("46f406136c5e4e5f874e283f95ed3dfc".toCharArray());
@@ -50,6 +48,15 @@ public class MainActivity extends AppCompatActivity {
         final MqttAndroidClient client =
                 new MqttAndroidClient(getApplicationContext(), "tcp://io.adafruit.com:1883",
                         clientId);
+
+        /**
+         * Send message Button
+         */
+        send_message.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
 
         try {
             IMqttToken token = client.connect(options);
@@ -62,15 +69,15 @@ public class MainActivity extends AppCompatActivity {
                     toast.show();
 
                     //Subscribing
-                    final String topic = "aakashk_kvjp58/f";
-                    int qos = 1;
-                    try {
-                        IMqttToken subToken = client.subscribe(topic, qos);
-                        subToken.setActionCallback(new IMqttActionListener() {
-                            @Override
-                            public void onSuccess(IMqttToken asyncActionToken) {
-                                // The message was published
-                                Toast.makeText(MainActivity.this, "Successfully subscribed to: " + topic, Toast.LENGTH_SHORT).show();
+//                    final String topic = "aakashk_kvjp58/f";
+//                    int qos = 1;
+//                    try {
+//                        IMqttToken subToken = client.subscribe(topic, qos);
+//                        subToken.setActionCallback(new IMqttActionListener() {
+//                            @Override
+//                            public void onSuccess(IMqttToken asyncActionToken) {
+//                                // The message was published
+//                                Toast.makeText(MainActivity.this, "Successfully subscribed to: " + topic, Toast.LENGTH_SHORT).show();
 
                                 //sending the message
 
@@ -89,40 +96,40 @@ public class MainActivity extends AppCompatActivity {
                                 }
 
                                 // disconnecting after task is done
-                                try {
-                                    IMqttToken disconToken = client.disconnect();
-                                    disconToken.setActionCallback(new IMqttActionListener() {
-                                        @Override
-                                        public void onSuccess(IMqttToken asyncActionToken) {
-                                            // we are now successfully disconnected
-                                        }
-
-                                        @Override
-                                        public void onFailure(IMqttToken asyncActionToken,
-                                                              Throwable exception) {
-                                            // something went wrong, but probably we are disconnected anyway
-                                        }
-                                    });
-                                } catch (MqttException e) {
-                                    e.printStackTrace();
-                                }
-
-                            }
-
-                            @Override
-                            public void onFailure(IMqttToken asyncActionToken,
-                                                  Throwable exception) {
-                                // The subscription could not be performed, maybe the user was not
-                                // authorized to subscribe on the specified topic e.g. using wildcards
-                                Toast.makeText(MainActivity.this, "Couldn't subscribe to: " + topic, Toast.LENGTH_SHORT).show();
-
+//                                try {
+//                                    IMqttToken disconToken = client.disconnect();
+//                                    disconToken.setActionCallback(new IMqttActionListener() {
+//                                        @Override
+//                                        public void onSuccess(IMqttToken asyncActionToken) {
+//                                            // we are now successfully disconnected
+//                                        }
+//
+//                                        @Override
+//                                        public void onFailure(IMqttToken asyncActionToken,
+//                                                              Throwable exception) {
+//                                            // something went wrong, but probably we are disconnected anyway
+//                                        }
+//                                    });
+//                                } catch (MqttException e) {
+//                                    e.printStackTrace();
+//                                }
 
                             }
-                        });
-                    } catch (MqttException e) {
-                        e.printStackTrace();
-                    }
-                }
+
+//                            @Override
+//                            public void onFailure(IMqttToken asyncActionToken,
+//                                                  Throwable exception) {
+//                                // The subscription could not be performed, maybe the user was not
+//                                // authorized to subscribe on the specified topic e.g. using wildcards
+//                                Toast.makeText(MainActivity.this, "Couldn't subscribe to: " + topic, Toast.LENGTH_SHORT).show();
+//
+//
+//                            }
+//                        });
+//                    } catch (MqttException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
 
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
@@ -137,9 +144,38 @@ public class MainActivity extends AppCompatActivity {
         } catch (MqttException e) {
             e.printStackTrace();
         }
-
             }
         });
+
+
+//        client.setCallback(new MqttCallback() {
+//            @Override
+//            public void connectionLost(Throwable cause) {
+//                Toast.makeText(MainActivity.this, "LOST", Toast.LENGTH_SHORT).show();
+//            }
+//
+//            @Override
+//            public void messageArrived(String topic, MqttMessage message) throws Exception {
+//
+//                Toast.makeText(MainActivity.this, message.toString(), Toast.LENGTH_SHORT).show();
+//                Log.d(TAG, "received");
+//            }
+//
+//            @Override
+//            public void deliveryComplete(IMqttDeliveryToken token) {
+//
+//                Toast.makeText(MainActivity.this, "completed", Toast.LENGTH_SHORT).show();
+//            }
+//        });
+
+
+
+    }
+
+    public void receiveMessage(View view){
+
+        Intent intent = new Intent(MainActivity.this, MqttReceiver.class);
+        startActivity(intent);
 
     }
 }
